@@ -59,6 +59,7 @@ foreach($array as $a){
 		//echo $oldPlace."2<br><br>"; 
 		$alg=$a->C15;
 		$temp=$a->C0;
+		$arrayAlg[]=$alg;
 		//echo $place."<br><br>";
 		$url = "http://opendata-download-metfcst.smhi.se/api/category/pmp2g/version/2/geotype/point/lon/$lng/lat/$lat/data.json";
 		$response = \Httpful\Request::get($url)
@@ -91,6 +92,7 @@ foreach($array as $a){
 }
 if(isset($object)){
 	$array_json = json_encode($object);
+	$array_json_alg=json_encode($arrayAlg);
 	
 }
 //Potentiella fel:
@@ -108,6 +110,7 @@ if(isset($object)){
 
 function myMap(){
 	var obj = JSON.parse('<?= $array_json; ?>');
+	var alg = JSON.parse('<?= $array_json_alg; ?>');
 
     var locations = obj;
 	//console.log(obj);
@@ -118,10 +121,22 @@ function myMap(){
     });
 
     var infowindow = new google.maps.InfoWindow();
+	var green='http://maps.google.com/mapfiles/ms/icons/green-dot.png';
+	var red='http://maps.google.com/mapfiles/ms/icons/red-dot.png';
+	var yellow='http://maps.google.com/mapfiles/ms/icons/yellow-dot.png';
 
     var marker, i;
 
     for (i = 0; i < locations.length; i++) {  
+	    	if(alg[i][0]=="Ingen blomning"){
+			var color=green;
+		}
+		if(alg[i][0]=="Blomning"){
+			var color=red;
+		}
+		if(alg[i][0]=="Ingen uppgift"){
+			var color=yellow;
+		}	
       marker = new google.maps.Marker({
         position: new google.maps.LatLng(locations[i][1], locations[i][2]),
         map: map
