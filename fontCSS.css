@@ -10,3 +10,8 @@ h2{
 ul{
 	font-family: "Times New Roman", Georgia, Serif;
 }
+
+Img{ 
+ width: 100%;
+  display: block;
+}
