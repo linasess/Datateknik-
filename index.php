@@ -1,31 +1,26 @@
 <!DOCTYPE html>
 <?php
-//ini_set('max_execution_time', 3600);
+ini_set('max_execution_time', 3600);
 $xml=simplexml_load_file("Provresultat.xml");
 //include('httpful.phar');
 $array=$xml->R;
 $oldPlace="?";
 $i=1;
 include('httpful.phar');
-//echo count($array)."<br>";
 $iForPoints=0;
 foreach($array as $a){
 	
 	$place=$a->C7;
-	//$place=trim(urlencode($a->C7),"%");	
-	//var_dump($place);
 	$place = parse_url($place,PHP_URL_FRAGMENT);
 	$place=substr($place,46);
 	$place=substr($place,0,-4);
 	if(preg_match('/"/', $place)>0){
 		$place="Okänt namn";
 	}
-
 	if($iForPoints==100){
 		$iForPoints=0;
 	}
 	if(($iForPoints==0&&$a->C10!=""&&$a->C9!=""&&strpos($place,$oldPlace)===false)||$i==1){
-		
 		$lng=$a->C10;
 		$lat=$a->C9;		
 		while(strlen($lng)>9){
@@ -33,13 +28,12 @@ foreach($array as $a){
 		}
 		while(strlen($lat)>9){
 			$lat=substr($lat,0,-1);
-		}	
+		}
 		$oldPlace=$place;
-
-		$alg=$a->C15;
-		$temp=$a->C0;
+		$alg=$a->C15;	
 		$arrayAlg[]=$alg;
-
+		$temp=$a->C0;
+		//echo $place."<br><br>";
 		$url = "http://opendata-download-metfcst.smhi.se/api/category/pmp2g/version/2/geotype/point/lon/$lng/lat/$lat/data.json";
 		$response = \Httpful\Request::get($url)
 		->send();
@@ -62,7 +56,7 @@ foreach($array as $a){
 		}		
 		
 		//<b>$place</b><br>
-		$object[]=array("<b>$place</b><br>Det finns: $alg i det har vattendraget<br>Vattentemperaturen ar vid senaste matningen: $temp grader celsius<br>Temperaturen på platsen är: $weatherTemp grader celsius" , $lat , $lng ,$i);	
+		$object[]=array("lat"=>(float)$lat,"lng"=>(float)$lng,"info"=>"<b>$place</b><br>Det finns: $alg i det har vattendraget<br>Vattentemperaturen ar vid senaste matningen: $temp grader celsius<br>Temperaturen på platsen är: $weatherTemp grader celsius");	
 		$i++;
 		
 	}
@@ -72,14 +66,10 @@ foreach($array as $a){
 if(isset($object)){
 	$array_json = json_encode($object);
 	$array_json_alg=json_encode($arrayAlg);
+	//var_dump($arrayAlg);
 	
 }
-//Potentiella fel:
-//""Kaffeberget"""
-// ["<b>Laholmsbukten, Birger Pers v\u00e4g<\/b><br>Det finns: Ingen blomning i det har vattendraget<br>Vattentemperaturen ar vid senaste matningen: 18 grader celsius<br>Temperaturen p\u00e5 platsen \u00e4r: 10.8 grader celsius","","",449]
-//["<b>Laholmsbukten, Koloniv\u00e4gen<\/b><br>Det finns: Ingen blomning i det har vattendraget<br>Vattentemperaturen ar vid senaste matningen: 18 grader celsius<br>Temperaturen p\u00e5 platsen \u00e4r: 10.8 grader celsius","5","1",448]
-//["<b>Laholmsbukten, Fiskaregatan<\/b><br>Det finns: Ingen blomning i det har vattendraget<br>Vattentemperaturen ar vid senaste matningen: 18 grader celsius<br>Temperaturen p\u00e5 platsen \u00e4r: 10.8 grader celsius",{"0":"56.4566"},{"0":"12.908"},447]
-?>	
+?>
 <html>
 <head>
     <meta charset="utf-8">
@@ -101,7 +91,7 @@ if(isset($object)){
     <div>
         <nav class="navbar navbar-default navigation-clean-button">
             <div class="container">
-                <div class="navbar-header"><a class="navbar-brand navbar-link" href="index.php" style="background-image:url(&quot;Bad&amp;Väder.png&quot;);">Bad &amp; Väder</a>
+                <div class="navbar-header"><a class="navbar-brand navbar-link" href="index.php" >Bad &amp; Väder</a>
                     <button class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button>
                 </div>
                 <div class="collapse navbar-collapse" id="navcol-1">
@@ -124,7 +114,8 @@ if(isset($object)){
 	<div class="container">
             <div class="row">
                 <div class="col-md-6" style="width:815px;">
-<script>			
+<div id="map" style="width:800px;height:500px"></div>
+   <script>
 function initMap() {
 	var alg = JSON.parse('<?= $array_json_alg; ?>');	
   var map = new google.maps.Map(document.getElementById('map'), {
@@ -135,13 +126,17 @@ function initMap() {
     }
   });
   var infoWin = new google.maps.InfoWindow();
+  // Add some markers to the map.
+  // Note: The code uses the JavaScript Array.prototype.map() method to
+  // create an array of markers based on a given "locations" array.
+  // The map() method here has nothing to do with the Google Maps API.
 	var green='http://maps.google.com/mapfiles/ms/icons/green-dot.png';
 	var red='http://maps.google.com/mapfiles/ms/icons/red-dot.png';
 	var yellow='http://maps.google.com/mapfiles/ms/icons/yellow-dot.png';
   
 	    var marker, i;
+	//alert(alg[0]);
 	
-
 var mcOptions = {styles: [{
 //grönt hjärta	
 height: 26,
@@ -178,7 +173,6 @@ height: 90,
 url: "https://raw.githubusercontent.com/googlemaps/v3-utility-library/master/markerclusterer/images/m5.png",
 width: 90
 }]}
-
   var markers = locations.map(function(location, i) {
 		console.log(alg[i][0]);
 	 	if(alg[i][0]=="Ingen blomning"){	
@@ -196,7 +190,6 @@ width: 90
 	  icon: color
 	  
     });
-
 	
     google.maps.event.addListener(marker, 'click', function(evt) {
       infoWin.setContent(location.info);
@@ -204,7 +197,6 @@ width: 90
     })
     return marker;
   });
-
   // Add a marker clusterer to manage the markers.
   var markerCluster = new MarkerClusterer(map, markers,mcOptions);
   
@@ -212,6 +204,19 @@ width: 90
 	  var index = 0;
 	  var i2=1;
 	  var lengthOfCluster = markers.length;
+	 /* if(i2==1){
+		  i2++;
+		 // alert(i2);
+		//  alert("hej1");
+		  console.log(markers[0]['icon']+"<br>");
+		  console.log(markers[1]['icon']);
+		console.log(markers[2]['icon']);
+	  	
+	  }*/
+	 //	 console.log(lengthOfCluster);
+	 // console.log(markers[2]/*['icon']*/);
+	 // alert(lengthOfCluster);
+	// var i2=0;
 	  for(var i=0;i<lengthOfCluster;i++){	
 	 	if(markers[i]['icon'].includes("red")){
 			var index=4;
@@ -221,6 +226,17 @@ width: 90
 			index=1;
 		}	
 	  }
+	///	alert("hej");
+	 /* var count = markers.length;
+	  var total = count;
+	  while (total !== 0) {
+		total = parseInt(total / 11);
+		index++;
+	  }
+	  index = Math.min(index, numStyles);
+	  console.log(index);
+	  */
+	  //console.log(index);
 	  return {
 		text: lengthOfCluster,
 		index: index
@@ -234,9 +250,9 @@ google.maps.event.addDomListener(window, "load", initMap);
     </script>
     <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js">
     </script>
-    <script async defer	
- src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCGaE0rlY-up9Ac2K3vOVQoKmgamBXtAns&callback=initMap">
-</script>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCGaE0rlY-up9Ac2K3vOVQoKmgamBXtAns&callback=initMap">
+    </script>
 </div>
 <div class="col-md-6" style="width:335px;">
 				
@@ -246,7 +262,7 @@ google.maps.event.addDomListener(window, "load", initMap);
 					<li>Grön - Ingen algblomning</li>
 					<li>Gul - Ingen mätdata</li>
 					<li>Röd - Algblomning </li>
-					</ul></p></div>
+			    </ul></p></div>
                 </div>
 				</div>
 <div class="footer-basic">
