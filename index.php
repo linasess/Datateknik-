@@ -124,6 +124,7 @@ if(isset($object)){
 	<div class="container">
             <div class="row">
                 <div class="col-md-6" style="width:815px;">
+<script>			
 function initMap() {
 	var alg = JSON.parse('<?= $array_json_alg; ?>');	
   var map = new google.maps.Map(document.getElementById('map'), {
@@ -234,7 +235,8 @@ google.maps.event.addDomListener(window, "load", initMap);
     <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js">
     </script>
     <script async defer	
- src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCGaE0rlY-up9Ac2K3vOVQoKmgamBXtAns&callback=initMap"></script>
+ src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCGaE0rlY-up9Ac2K3vOVQoKmgamBXtAns&callback=initMap">
+</script>
 </div>
 <div class="col-md-6" style="width:335px;">
 				
