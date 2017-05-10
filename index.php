@@ -20,15 +20,12 @@ foreach($array as $a){
 	if(preg_match('/"/', $place)>0){
 		$place="Okänt namn";
 	}
-	/*while(strpos($place,"<")!==false){
-		$place=substr($place,1);
-	}*/
-	if($iForPoints==300){
+
+	if($iForPoints==100){
 		$iForPoints=0;
 	}
 	if(($iForPoints==0&&$a->C10!=""&&$a->C9!=""&&strpos($place,$oldPlace)===false)||$i==1){
 		
-	//if(($a->C10!=""&&$a->C9!=""&&strpos($place,$oldPlace)===false)||$i==1){
 		$lng=$a->C10;
 		$lat=$a->C9;		
 		while(strlen($lng)>9){
@@ -127,25 +124,63 @@ if(isset($object)){
 	<div class="container">
             <div class="row">
                 <div class="col-md-6" style="width:815px;">
-<div id="map" style="width:800px;height:500px"></div>
-<script>
-function myMap(){
-	var obj = JSON.parse('<?= $array_json; ?>');
-	var alg = JSON.parse('<?= $array_json_alg; ?>');
-    var locations = obj;
-	//console.log(obj);
-    var map = new google.maps.Map(document.getElementById('map'), {
-      zoom: 4,
-      center: new google.maps.LatLng(62.381435, 17.383067),
-      mapTypeId: google.maps.MapTypeId.ROADMAP
-    });
-    var infowindow = new google.maps.InfoWindow();
+function initMap() {
+	var alg = JSON.parse('<?= $array_json_alg; ?>');	
+  var map = new google.maps.Map(document.getElementById('map'), {
+    zoom: 3,
+    center: {
+      lat: 62.381435,
+      lng: 17.383067
+    }
+  });
+  var infoWin = new google.maps.InfoWindow();
 	var green='http://maps.google.com/mapfiles/ms/icons/green-dot.png';
 	var red='http://maps.google.com/mapfiles/ms/icons/red-dot.png';
 	var yellow='http://maps.google.com/mapfiles/ms/icons/yellow-dot.png';
-    var marker, i;
-    for (i = 0; i < locations.length; i++) {  
-	    if(alg[i][0]=="Ingen blomning"){
+  
+	    var marker, i;
+	
+
+var mcOptions = {styles: [{
+//grönt hjärta	
+height: 26,
+url: "https://raw.githubusercontent.com/plank/MarkerClusterer/mod/images/heart30.png",
+width: 30
+},
+{ 
+//blå	
+height: 53,
+url: "https://raw.githubusercontent.com/googlemaps/v3-utility-library/master/markerclusterer/images/m1.png",
+width: 53
+},
+{
+//gul	
+height: 56,
+url: "https://raw.githubusercontent.com/googlemaps/v3-utility-library/master/markerclusterer/images/m2.png",
+width: 56
+},
+{
+//röd	
+height: 66,
+url: "https://raw.githubusercontent.com/googlemaps/v3-utility-library/master/markerclusterer/images/m3.png",
+width: 66
+},
+{
+//ljuslila		
+height: 78,
+url: "https://raw.githubusercontent.com/googlemaps/v3-utility-library/master/markerclusterer/images/m4.png",
+width: 78
+},
+{
+//mörklila
+height: 90,
+url: "https://raw.githubusercontent.com/googlemaps/v3-utility-library/master/markerclusterer/images/m5.png",
+width: 90
+}]}
+
+  var markers = locations.map(function(location, i) {
+		console.log(alg[i][0]);
+	 	if(alg[i][0]=="Ingen blomning"){	
 			var color=green;
 		}
 		if(alg[i][0]=="Blomning"){
@@ -153,23 +188,53 @@ function myMap(){
 		}
 		if(alg[i][0]=="Ingen uppgift"){
 			var color=yellow;
-		}	
-      marker = new google.maps.Marker({
-        position: new google.maps.LatLng(locations[i][1], locations[i][2]),
-        map: map,
-		icon: color
-      });
-      google.maps.event.addListener(marker, 'click', (function(marker, i) {
-        return function() {
-          infowindow.setContent(locations[i][0]);
-          infowindow.open(map, marker);
-        }
-      })(marker, i));
-    }
-}	
-</script>	
+		}	 
+    var marker = new google.maps.Marker({
+		
+      position: location,
+	  icon: color
+	  
+    });
+
 	
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCGaE0rlY-up9Ac2K3vOVQoKmgamBXtAns&callback=myMap"></script>
+    google.maps.event.addListener(marker, 'click', function(evt) {
+      infoWin.setContent(location.info);
+      infoWin.open(map, marker);
+    })
+    return marker;
+  });
+
+  // Add a marker clusterer to manage the markers.
+  var markerCluster = new MarkerClusterer(map, markers,mcOptions);
+  
+	  markerCluster.setCalculator(function(markers, numStyles){
+	  var index = 0;
+	  var i2=1;
+	  var lengthOfCluster = markers.length;
+	  for(var i=0;i<lengthOfCluster;i++){	
+	 	if(markers[i]['icon'].includes("red")){
+			var index=4;
+			break;
+		}
+		if(markers[i]['icon'].includes("green")){	
+			index=1;
+		}	
+	  }
+	  return {
+		text: lengthOfCluster,
+		index: index
+	  };
+	});  
+}
+var obj = JSON.parse('<?= $array_json; ?>');
+var locations = obj;
+//console.log(locations);
+google.maps.event.addDomListener(window, "load", initMap);
+    </script>
+    <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js">
+    </script>
+    <script async defer	
+ src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCGaE0rlY-up9Ac2K3vOVQoKmgamBXtAns&callback=initMap"></script>
 </div>
 <div class="col-md-6" style="width:335px;">
 				
