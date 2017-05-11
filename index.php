@@ -114,7 +114,7 @@ if(isset($object)){
 	<div class="container">
             <div class="row">
                 <div class="col-md-6" style="width:815px;">
-<div id="map" style="width:800px;height:500px"></div>
+<div id="map" style="width:800px;height:500px"> </div>
    <script>
 function initMap() {
 	var alg = JSON.parse('<?= $array_json_alg; ?>');	
@@ -258,11 +258,14 @@ google.maps.event.addDomListener(window, "load", initMap);
 				
 				
                     <div><p><h1>Bad & Väder </h1>
+					<h2> Här kan du se väder, temperatur och status för algblomning vid just din badplats. </h2>
+
+					<h2>Genom att klicka på det området som du befinner dig i så kan du enkelt hitta information om din badplats. </h2>
 					<ul>
 					<li>Grön - Ingen algblomning</li>
 					<li>Gul - Ingen mätdata</li>
 					<li>Röd - Algblomning </li>
-			    </ul></p></div>
+					</ul></p></div>
                 </div>
 				</div>
 <div class="footer-basic">
