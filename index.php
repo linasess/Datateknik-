@@ -32,31 +32,43 @@ foreach($array as $a){
 		$oldPlace=$place;
 		$alg=$a->C15;	
 		$arrayAlg[]=$alg;
+		$alg=strtolower($alg);
 		$temp=$a->C0;
-		//echo $place."<br><br>";
-		$url = "http://opendata-download-metfcst.smhi.se/api/category/pmp2g/version/2/geotype/point/lon/$lng/lat/$lat/data.json";
-		$response = \Httpful\Request::get($url)
-		->send();
-		$rows = json_decode($response, true);
-		$timeNow=date("Y-m-d h:a",time());
-		$rowsUsed= $rows['timeSeries'];
-		if(count($rowsUsed)!=0){		
-			foreach($rowsUsed as $time){				
-				$bT=strtotime($time['validTime']);
-				$t=date("Y-m-d h:a",strtotime("-2 hours",$bT));
-				if($t==$timeNow){
-					$rowsUsed=$time['parameters'];
-					foreach($rowsUsed as $weather){
-						if($weather['name']=='t'){
-							$weatherTemp=$weather['values'][0];
+		$measuredAt=strtotime($a->C12);
+		$measuredAt=date("Y-m-d",$measuredAt);
+		$lng=(float)$lng;
+		$lat=(float)$lat;
+		$diff=0.5;
+		if(($oldLng-$diff)>$lng||($oldLng+$diff)<$lng||$oldLat-$diff>$lat||($oldLat+$diff)<$lat||$oldWeatherTemp==0){
+			$url = "http://opendata-download-metfcst.smhi.se/api/category/pmp2g/version/2/geotype/point/lon/$lng/lat/$lat/data.json";
+			$response = \Httpful\Request::get($url)
+			->send();
+			$rows = json_decode($response, true);
+			$timeNow=date("Y-m-d h:a",time());
+			$rowsUsed= $rows['timeSeries'];
+			if(count($rowsUsed)!=0){		
+				foreach($rowsUsed as $time){				
+					$bT=strtotime($time['validTime']);
+					$t=date("Y-m-d h:a",strtotime("-2 hours",$bT));
+					if($t==$timeNow){
+						$rowsUsed=$time['parameters'];
+						foreach($rowsUsed as $weather){
+							if($weather['name']=='t'){
+								$weatherTemp=$weather['values'][0];
+							}
 						}
 					}
 				}
-			}
+			}		
+
+		else{
+			$weatherTemp=$oldWeatherTemp;
 		}		
 		
-		//<b>$place</b><br>
-		$object[]=array("lat"=>(float)$lat,"lng"=>(float)$lng,"info"=>"<b>$place</b><br>Det finns: $alg i det har vattendraget<br>Vattentemperaturen ar vid senaste matningen: $temp grader celsius<br>Temperaturen på platsen är: $weatherTemp grader celsius");	
+		$object[]=array("lat"=>$lat,"lng"=>$lng,"info"=>"<b>$place</b><br>Senaste mätningen av algblomningen och vattentemperatur genomfördes $measuredAt.<br>Då fanns $alg.<br>Vattentemperaturen var $temp grader celsius.<br>Temperaturen på platsen är $weatherTemp grader celsius.");	
+		$oldLng=$lng;
+		$oldLat=$lat;
+		$oldWeatherTemp=$weatherTemp;
 		$i++;
 		
 	}
@@ -113,8 +125,8 @@ if(isset($object)){
     <div>
 	<div class="container">
             <div class="row">
-                <div class="col-md-6" style="width:815px;">
-<div id="map" style="width:800px;height:500px"> </div>
+
+<div id="map" class="col-md-6"> </div>
    <script>
 function initMap() {
 	var alg = JSON.parse('<?= $array_json_alg; ?>');	
@@ -254,7 +266,7 @@ google.maps.event.addDomListener(window, "load", initMap);
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCGaE0rlY-up9Ac2K3vOVQoKmgamBXtAns&callback=initMap">
     </script>
 </div>
-<div class="col-md-6" style="width:335px;">
+<div class="col-md-6">
 				
 				
                     <div><p><h1>Bad & Väder </h1>
