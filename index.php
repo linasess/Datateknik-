@@ -243,7 +243,6 @@ google.maps.event.addDomListener(window, "load", initMap);
     <script async defer
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCGaE0rlY-up9Ac2K3vOVQoKmgamBXtAns&callback=initMap">
     </script>
-</div>
 <div class="col-md-6">
 				
 				
