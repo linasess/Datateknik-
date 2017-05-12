@@ -126,7 +126,7 @@ if(isset($object)){
 	<div class="container">
             <div class="row">
 
-<div id="map" class="col-md-6"> </div>
+<div id="map" class="col-md-6" style="left:15px;margin-right:30px;max-width:550px;"> </div>
    <script>
 function initMap() {
 	var alg = JSON.parse('<?= $array_json_alg; ?>');	
