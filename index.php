@@ -131,7 +131,7 @@ if(isset($object)){
 function initMap() {
 	var alg = JSON.parse('<?= $array_json_alg; ?>');	
   var map = new google.maps.Map(document.getElementById('map'), {
-    zoom: 3,
+    zoom: 4,
     center: {
       lat: 62.381435,
       lng: 17.383067
@@ -150,10 +150,10 @@ function initMap() {
 	//alert(alg[0]);
 	
 var mcOptions = {styles: [{
-//grönt hjärta	
-height: 26,
-url: "https://raw.githubusercontent.com/plank/MarkerClusterer/mod/images/heart30.png",
-width: 30
+//grön	
+height: 66,
+url: "https://raw.githubusercontent.com/linasess/Datateknik-/master/green2.png",
+width: 66
 },
 { 
 //blå	
@@ -214,21 +214,9 @@ width: 90
   
 	  markerCluster.setCalculator(function(markers, numStyles){
 	  var index = 0;
-	  var i2=1;
+
 	  var lengthOfCluster = markers.length;
-	 /* if(i2==1){
-		  i2++;
-		 // alert(i2);
-		//  alert("hej1");
-		  console.log(markers[0]['icon']+"<br>");
-		  console.log(markers[1]['icon']);
-		console.log(markers[2]['icon']);
-	  	
-	  }*/
-	 //	 console.log(lengthOfCluster);
-	 // console.log(markers[2]/*['icon']*/);
-	 // alert(lengthOfCluster);
-	// var i2=0;
+
 	  for(var i=0;i<lengthOfCluster;i++){	
 	 	if(markers[i]['icon'].includes("red")){
 			var index=4;
@@ -238,17 +226,7 @@ width: 90
 			index=1;
 		}	
 	  }
-	///	alert("hej");
-	 /* var count = markers.length;
-	  var total = count;
-	  while (total !== 0) {
-		total = parseInt(total / 11);
-		index++;
-	  }
-	  index = Math.min(index, numStyles);
-	  console.log(index);
-	  */
-	  //console.log(index);
+
 	  return {
 		text: lengthOfCluster,
 		index: index
