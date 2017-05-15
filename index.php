@@ -126,7 +126,7 @@ if(isset($object)){
 	<div class="container">
             <div class="row">
 
-<div id="map" class="col-md-6" style="left:15px;margin-right:30px;max-width:550px;"> </div>
+<div id="map" class="col-md-6" style="left:15px;margin-right:30px;"> </div>
    <script>
 function initMap() {
 	var alg = JSON.parse('<?= $array_json_alg; ?>');	
@@ -243,7 +243,7 @@ google.maps.event.addDomListener(window, "load", initMap);
     <script async defer
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCGaE0rlY-up9Ac2K3vOVQoKmgamBXtAns&callback=initMap">
     </script>
-<div class="col-md-6"style="width:350px;">
+<div class="col-md-6"style="width:300px;">
 				
 				
                     <div><p><h1>Bad & Väder </h1>
