@@ -303,12 +303,14 @@ google.maps.event.addDomListener(window, "load", initMap);
                     <div><h1>Bad & Väder </h1>
 					<h2> Här kan du se väder, temperatur och status för algblomning vid just din badplats. </h2>
 
-					<h2>Genom att klicka på det området som du befinner dig i så kan du enkelt hitta information om din badplats. </h2>
+					<h2>Genom att klicka på det området som du befinner dig i så får du upp status för algbloming vid den senaste mätningen. </h2>
 					<ul>
-					<li>Grön - Ingen algblomning</li>
-					<li>Gul - Ingen mätdata</li>
-					<li>Röd - Algblomning </li>
-					</ul></div>
+					<li>Grön färg- Ingen algblomning</li>
+					<li>Gul färg- Ingen mätdata</li>
+					<li>Röd färg- Algblomning </li>
+					</ul>
+					<h2>Bada lungt!</h2>
+					</div>
                 </div>
 				</div>
 				</div>
@@ -323,6 +325,8 @@ google.maps.event.addDomListener(window, "load", initMap);
                 <li><a href="omoss.html">Om oss</a></li>
                 </ul>
                 <p class="copyright">Bad &amp; Väder © 2017</p>
+				<!-- Kontaktinfromation -->
+		<p class="copyright">Kontakta oss: 073-9596915 badovader@gmail.com Holmgatan 10, 851 70 Sundsvall </p> 
         </footer>
     </div>
     <script src="assets/js/jquery.min.js"></script>
