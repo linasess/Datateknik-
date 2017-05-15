@@ -12,10 +12,12 @@ $oldPlace="?";
 $oldLng=0;
 $oldLat=0;
 $algInfo="";
+$oldWind="";
 $i=1;
 $oldWeatherTemp=0;
 //Inkluderar biblioteket httpful.
 include('httpful.phar');
+
 $iForPoints=0;
 //En array som går igenom alla objekt med provresultat.
 foreach($array as $a){
@@ -76,42 +78,64 @@ foreach($array as $a){
 		//Om de nya kordinaterna är utanför spannet hämtas aktuell temperatur.
 		$diff=0.5;
 		if(($oldLng-$diff)>$lng||($oldLng+$diff)<$lng||$oldLat-$diff>$lat||($oldLat+$diff)<$lat||$oldWeatherTemp==0){
-			//SMHIs api anropas med kordinaterna från xml-filen
+			//SMHIs api anropas med kordinaterna från xml-filen.
 			$url = "http://opendata-download-metfcst.smhi.se/api/category/pmp2g/version/2/geotype/point/lon/$lng/lat/$lat/data.json";
 			$response = \Httpful\Request::get($url)
 			->send();
+			//Datan från SMHIs api hämtas och avkoder JSONformatet.
 			$rows = json_decode($response, true);
+			//Den aktuella tiden (nutid) hämtas.
 			$timeNow=date("Y-m-d h:a",time());
+			//Tiden från apin anges.
 			$rowsUsed= $rows['timeSeries'];
+			//Kontrolerar att det finns några rader.
 			if(count($rowsUsed)!=0){		
-				foreach($rowsUsed as $time){				
+				//Går igenom alla arrays med objekt.
+				foreach($rowsUsed as $time){	
+					//Tiden för mätningen av temperaturen hämtas.
 					$bT=strtotime($time['validTime']);
+					//Tiden görs om till jämförbart format och det dras av två timmar.
+					//Annars korrelerar inte SMHIs tid med den aktuella tiden.
 					$t=date("Y-m-d h:a",strtotime("-2 hours",$bT));
+					//Går vidare om tiden från SMHIs mätning matchar den nuvarande tiden (finns flera
+					//tidpunkter med temperaturangivelse).
 					if($t==$timeNow){
+						//En array med objekt som innehåller inforamtion så som väder anges.
 						$rowsUsed=$time['parameters'];
+						//Går igenom varje objekt som innehåller information om väder. 
 						foreach($rowsUsed as $weather){
+							//Om objektet beskriver temperaturen "t" hämtas värdet. 
 							if($weather['name']=='t'){
 								$weatherTemp=$weather['values'][0];
 							}
+							//Om objektet beskriver vindhastigheten "ws" hämtas värdet. 
+							if($weather['name']=='ws'){
+								$wind=$weather['values'][0];
+							}							
 						}
 					}
 				}
 			}
-		}		
+		}
+		//Om ingen ny data hämtas anges de gammla föregående värdena.	
 		else{
 			$weatherTemp=$oldWeatherTemp;
+			$wind=$oldWind;
 		}		
-		
-		$object[]=array("lat"=>$lat,"lng"=>$lng,"info"=>"<b>$place</b><br>Senaste mätningen av algblomningen och vattentemperatur genomfördes $measuredAt.<br>$algInfo<br>Vattentemperaturen var $temp grader celsius.<br>Temperaturen på platsen är $weatherTemp grader celsius.");	
+		//En array med all information som kommer användas av Google Maps api i javascriptet.
+		$object[]=array("lat"=>$lat,"lng"=>$lng,"info"=>"<b>$place</b><br>Senaste mätningen av algblomningen och vattentemperatur genomfördes $measuredAt.<br>$algInfo<br>Vattentemperaturen var $temp grader celsius.<br>Temperaturen på platsen är $weatherTemp grader celsius och vindhastigheten är $wind m/s.");	
 		$oldLng=$lng;
 		$oldLat=$lat;
 		$oldWeatherTemp=$weatherTemp;
+		$oldWind=$wind;
 		$i++;
 	}
 	
 	//$iForPoints++;
 }
+//Går vidare om det finns ett objekt.
 if(isset($object)){
+	//Arrayerna kodas om till JSON för att kunna användas av javascriptet.
 	$array_json = json_encode($object);
 	$array_json_alg=json_encode($arrayAlg);	
 }
@@ -166,132 +190,106 @@ if(isset($object)){
 				</div>
    <script>
 function initMap() {
+	//Hämtar objektet med information om algblomning från php.
 	var alg = JSON.parse('<?= $array_json_alg; ?>');	
-  var map = new google.maps.Map(document.getElementById('map'), {
-    zoom: 4,
-    center: {
-      lat: 62.381435,
-      lng: 17.383067
-    }
-  });
-  
-  var infoWin = new google.maps.InfoWindow();
-  // Add some markers to the map.
-  // Note: The code uses the JavaScript Array.prototype.map() method to
-  // create an array of markers based on a given "locations" array.
-  // The map() method here has nothing to do with the Google Maps API.
+	//En ny karta från Google Maps anges med initiell zoom och utgångspunkt (Sundsvall).
+	var map = new google.maps.Map(document.getElementById('map'), {
+		zoom: 4,
+		center: {
+			lat: 62.381435,
+			lng: 17.383067
+		}
+	});
+	//En ny inforuta anges.
+	var infoWin = new google.maps.InfoWindow();
+	//Färger till punkterna på kartan hämtas.
 	var green='http://maps.google.com/mapfiles/ms/icons/green-dot.png';
 	var red='http://maps.google.com/mapfiles/ms/icons/red-dot.png';
 	var yellow='http://maps.google.com/mapfiles/ms/icons/yellow-dot.png';
-  
-	    var marker, i;
-	//alert(alg[0]);
-	
-var mcOptions = {styles: [{
-//grön	
-height: 66,
-url: "https://raw.githubusercontent.com/linasess/Datateknik-/master/green2.png",
-width: 66
-},
-{ 
-//blå	
-height: 53,
-url: "https://raw.githubusercontent.com/googlemaps/v3-utility-library/master/markerclusterer/images/m1.png",
-width: 53
-},
-{
-//gul	
-height: 56,
-url: "https://raw.githubusercontent.com/googlemaps/v3-utility-library/master/markerclusterer/images/m2.png",
-width: 56
-},
-{
-	
-//röd	
-height: 66,
-url: "https://raw.githubusercontent.com/googlemaps/v3-utility-library/master/markerclusterer/images/m3.png",
-width: 66
-},
-{
-//ljuslila		
-height: 78,
-url: "https://raw.githubusercontent.com/googlemaps/v3-utility-library/master/markerclusterer/images/m4.png",
-width: 78
-},
-{
-//mörklila
-height: 90,
-url: "https://raw.githubusercontent.com/googlemaps/v3-utility-library/master/markerclusterer/images/m5.png",
-width: 90
-}]}
-  var markers = locations.map(function(location, i) {
-		console.log(alg[i][0]);
+	//Inställningar för klustret anges.
+	var mcOptions = {styles: [{
+	//grön	
+	height: 66,
+	url: "https://raw.githubusercontent.com/linasess/Datateknik-/master/green2.png",
+	width: 66
+	},
+	{	
+	//röd	
+	height: 66,
+	url: "https://raw.githubusercontent.com/googlemaps/v3-utility-library/master/markerclusterer/images/m3.png",
+	width: 66
+	}]}
+	//Lägger till alla punkter från arrayen "locations" nedan.
+	var markers = locations.map(function(location, i) {
+		//Om algstatusen för platsen är "Ingen blomning" anges färgen grön till punkten.
 	 	if(alg[i][0]=="Ingen blomning"){	
 			var color=green;
 		}
+		//Om algstatusen för platsen är "Blomning" anges färgen röd till punkten.
 		if(alg[i][0]=="Blomning"){
 			var color=red;
 		}
+		//Om algstatusen för platsen är "Ingen uppgifte" anges färgen gul till punkten.
 		if(alg[i][0]=="Ingen uppgift"){
 			var color=yellow;
 		}	 
-    var marker = new google.maps.Marker({
+		//Varje punkt anges med postition och färg.
+		var marker = new google.maps.Marker({
 		
-      position: location,
-	  icon: color
+			position: location,
+			icon: color
 	  
-    });
-	
-    google.maps.event.addListener(marker, 'click', function(evt) {
-      infoWin.setContent(location.info);
-      infoWin.open(map, marker);
-    })
-    return marker;
-  });
-  // Add a marker clusterer to manage the markers.
-  var markerCluster = new MarkerClusterer(map, markers,mcOptions);
-  
-	  markerCluster.setCalculator(function(markers, numStyles){
-	  var index = 0;
-	  var i2=1;
-	  var lengthOfCluster = markers.length;
-	 /* if(i2==1){
-		  i2++;
-		 // alert(i2);
-		//  alert("hej1");
-		  console.log(markers[0]['icon']+"<br>");
-		  console.log(markers[1]['icon']);
-		console.log(markers[2]['icon']);
-	  	
-	  }*/
-	 //	 console.log(lengthOfCluster);
-	 // console.log(markers[2]/*['icon']*/);
-	 // alert(lengthOfCluster);
-	// var i2=0;
-	  for(var i=0;i<lengthOfCluster;i++){	
-	 	if(markers[i]['icon'].includes("red")){
-			var index=4;
-			break;
+		});
+		//En inforutan anges till varje punkt där informationen också kommer från arrayen "locations" nedan.
+		google.maps.event.addListener(marker, 'click', function(evt) {
+			infoWin.setContent(location.info);
+			infoWin.open(map, marker);
+		})
+		//Punkten retuneras slutligen från funktionen.
+		return marker;
+	});
+
+	//Lägger til ett kluster av punkterna.
+	var markerCluster = new MarkerClusterer(map, markers,mcOptions);
+	//En funktion som bestämmer inställningarna för klustret.
+	markerCluster.setCalculator(function(markers, numStyles){
+		var index = 0;
+		//Tar fram längden av varje kluster.
+		var lengthOfCluster = markers.length;
+		//En loop som går igenom alla punkter i klustret.
+		for(var i=0;i<lengthOfCluster;i++){	
+			//Om ikonen i klustret är röd anges index=2 som representeras av röd (se ovan)
+			//och sedan bryts loopen. Färgen på ikonen för klustret blir alltså röd om
+			//någon punkt i klustret är röd, dvs har status algblmoning.
+			if(markers[i]['icon'].includes("red")){
+				var index=2	;
+				break;
+			}
+			//Om ikonen är grön dvs inte har algblomning anges index=1 som representeras av färgen grön.
+			if(markers[i]['icon'].includes("green")){	
+				index=1;
+			}	
 		}
-		if(markers[i]['icon'].includes("green")){	
-			index=1;
-		}	
-	  }
-	  return {
+		//Funtionen returnerar, för varje kluster, längden på klustret samt inställnigar (i detta fall
+		//färg och storlek på ikon).
+		return {
 		text: lengthOfCluster,
 		index: index
-	  };
+		};
 	}); 
 		
 }
+//Hämtar objektet med information från php.
 var obj = JSON.parse('<?= $array_json; ?>');
+//Alla punkter med medföljande information läggs till.
 var locations = obj;
-//console.log(locations);
+//Laddar kartan.
 google.maps.event.addDomListener(window, "load", initMap);
     </script>
+	<!--Klustret hämtas från Google Maps-->
     <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js">
     </script>
-	<!--karta -->
+	<!--Kartan hämtas från Google Maps som anropar javascriptfunktionen 'initMap'-->
     <script async defer
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBTmzSil2kh4Qii5NGbMuS6UWUoXSzzExk&callback=initMap">
     </script>
