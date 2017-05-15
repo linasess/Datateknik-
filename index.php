@@ -243,7 +243,7 @@ google.maps.event.addDomListener(window, "load", initMap);
     <script async defer
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCGaE0rlY-up9Ac2K3vOVQoKmgamBXtAns&callback=initMap">
     </script>
-<div class="col-md-6"style="width:300px;">
+<div class="col-md-6" style="width:300px;">
 				
 				
                     <div><p><h1>Bad & Väder </h1>
