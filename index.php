@@ -120,7 +120,9 @@ if(isset($object)){
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
     <title>Bad&amp;vader</title>
+	<!--Länkar till css -->
     <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/fonts/ionicons.min.css">
     <link rel="stylesheet" href="assets/css/Footer-Basic.css">
@@ -142,6 +144,7 @@ if(isset($object)){
                 </div>
                 <div class="collapse navbar-collapse" id="navcol-1">
                     <ul class="nav navbar-nav">
+					<!--Meny på framsida och länkar till undersidor -->
                         <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false" href="#">Information om algblomning</a>
                             <ul class="dropdown-menu" role="menu">
                                 <li role="presentation"><a href="vadaralgblomning.html">Vad är algblomning?</a></li>
@@ -150,6 +153,7 @@ if(isset($object)){
                                 <li role="presentation"><a href="bralankar.html">Bra länkar</a></li>
                             </ul>
                         </li>
+						<!--Om oss i menyrad -->
                     </ul><a class="btn btn-default navbar-btn action-button" role="button" href="omoss.html">Om oss</a>
                     <p class="navbar-text navbar-right actions"> </p>
                 </div>
@@ -287,10 +291,12 @@ google.maps.event.addDomListener(window, "load", initMap);
     </script>
     <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js">
     </script>
+	<!--karta -->
     <script async defer
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBTmzSil2kh4Qii5NGbMuS6UWUoXSzzExk&callback=initMap">
     </script>
-
+	
+ <!-- Informationstext -->
 <div class="col-md-6" style="width:300px;">
 				
 				
@@ -307,6 +313,7 @@ google.maps.event.addDomListener(window, "load", initMap);
 				</div>
 				</div>
 <div class="footer-basic">
+<!--Länkar till socialamedier -->
         <footer>
             <div class="social"><a href="https://www.instagram.com/"><i class="icon ion-social-instagram"></i></a><a href="https://twitter.com/"><i class="icon ion-social-twitter"></i></a><a href="https://www.facebook.com/"><i class="icon ion-social-facebook"></i></a></div>
             <ul
